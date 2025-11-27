@@ -18,8 +18,53 @@ main { max-width: 900px; margin: 20px auto; padding: 0 16px; }
 section, .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
 label { display: block; margin: 8px 0 4px; }
 input, select, button, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; }
-button { background: var(--primary); color: #fff; cursor: pointer; }
+button { background: var(--primary); color: #fff; cursor: pointer; transition: all 0.2s; position: relative; }
 button:hover { filter: brightness(1.05); }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+button.loading { pointer-events: none; }
+button.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spinner 0.6s linear infinite;
+}
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(248, 249, 251, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+.page-loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.page-loader .spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spinner 0.8s linear infinite;
+}
 .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 @media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
 .list { display: flex; flex-direction: column; gap: 8px; }

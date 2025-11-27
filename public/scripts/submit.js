@@ -4,6 +4,8 @@ async function submitSong(e) {
   e.preventDefault();
   const userId = localStorage.getItem('userId');
   const msg = document.getElementById('songMsg');
+  const btn = e.target.querySelector('button[type="submit"]');
+  
   if (!userId) { 
     msg.textContent = 'Veuillez vous inscrire d\'abord.';
     setTimeout(() => window.location.href = '/register.html', 2000);
@@ -13,6 +15,10 @@ async function submitSong(e) {
   const artist = document.getElementById('artist').value.trim();
   const audioUrl = document.getElementById('audioUrl').value.trim();
   if (!title || !artist) { msg.textContent = 'Titre et artiste sont requis.'; return; }
+  
+  btn.classList.add('loading');
+  btn.disabled = true;
+  
   try {
     const res = await fetch('/api/submit-song', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -28,7 +34,9 @@ async function submitSong(e) {
         window.location.href = '/register.html';
         return;
       }
-      msg.textContent = data.error || 'Erreur de soumission'; 
+      msg.textContent = data.error || 'Erreur de soumission';
+      btn.classList.remove('loading');
+      btn.disabled = false;
       return; 
     }
     msg.textContent = 'Chanson soumise avec succès ! Redirection...';
@@ -36,6 +44,8 @@ async function submitSong(e) {
     setTimeout(() => window.location.href = '/vote.html', 1000);
   } catch (err) {
     msg.textContent = 'Erreur réseau';
+    btn.classList.remove('loading');
+    btn.disabled = false;
   }
 }
 

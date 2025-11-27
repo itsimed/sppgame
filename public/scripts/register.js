@@ -19,21 +19,33 @@ async function register(e) {
   e.preventDefault();
   const firstName = document.getElementById('firstName').value.trim();
   const msg = document.getElementById('registerMsg');
+  const btn = e.target.querySelector('button[type="submit"]');
   msg.textContent = '';
   if (!firstName) { msg.textContent = 'Veuillez entrer un prénom.'; return; }
+  
+  btn.classList.add('loading');
+  btn.disabled = true;
+  
   try {
     const res = await fetch('/api/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ firstName })
     });
     const data = await res.json();
-    if (!res.ok) { msg.textContent = data.error || 'Erreur d\'inscription'; return; }
+    if (!res.ok) { 
+      msg.textContent = data.error || 'Erreur d\'inscription';
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      return; 
+    }
     localStorage.setItem('userId', data.user.id);
     localStorage.setItem('firstName', data.user.firstName);
     // Redirection automatique vers la soumission de chanson
     window.location.href = '/submit.html';
   } catch (err) {
     msg.textContent = 'Erreur réseau';
+    btn.classList.remove('loading');
+    btn.disabled = false;
   }
 }
 

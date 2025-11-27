@@ -85,6 +85,10 @@ function renderVoting(users, songs) {
         return; 
       }
       if (!guessedUserId) { msg.textContent = 'Veuillez choisir un prénom.'; return; }
+      
+      btn.classList.add('loading');
+      btn.disabled = true;
+      
       try {
         const res = await fetch('/api/vote', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -100,12 +104,18 @@ function renderVoting(users, songs) {
             window.location.href = '/register.html';
             return;
           }
-          msg.textContent = data.error || 'Erreur de vote'; 
+          msg.textContent = data.error || 'Erreur de vote';
+          btn.classList.remove('loading');
+          btn.disabled = false;
           return; 
         }
         msg.textContent = data.vote.isCorrect ? 'Bravo ! Bonne réponse.' : 'Raté, ce n\'est pas la bonne personne.';
+        btn.classList.remove('loading');
+        btn.disabled = false;
       } catch (err) {
         msg.textContent = 'Erreur réseau';
+        btn.classList.remove('loading');
+        btn.disabled = false;
       }
     });
 

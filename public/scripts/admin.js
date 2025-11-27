@@ -46,15 +46,30 @@ async function loadSongs() {
 
 async function resetAll() {
   const msg = document.getElementById('adminMsg');
+  const btn = document.getElementById('resetBtn');
   msg.textContent = '';
+  
+  btn.classList.add('loading');
+  btn.disabled = true;
+  
   try {
     const res = await fetch('/api/reset', { method: 'POST' });
     const data = await res.json();
-    if (!res.ok) { msg.textContent = data.error || 'Erreur reset'; return; }
+    if (!res.ok) { 
+      msg.textContent = data.error || 'Erreur reset';
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      return; 
+    }
     msg.textContent = 'Réinitialisation effectuée.';
     await loadSongs();
+    await loadResults();
+    btn.classList.remove('loading');
+    btn.disabled = false;
   } catch (err) {
     msg.textContent = 'Erreur réseau';
+    btn.classList.remove('loading');
+    btn.disabled = false;
   }
 }
 
@@ -177,6 +192,14 @@ async function loadResults() {
 
 document.getElementById('resetBtn').addEventListener('click', resetAll);
 const refreshBtn = document.getElementById('refreshResultsBtn');
-if (refreshBtn) refreshBtn.addEventListener('click', loadResults);
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', async () => {
+    refreshBtn.classList.add('loading');
+    refreshBtn.disabled = true;
+    await loadResults();
+    refreshBtn.classList.remove('loading');
+    refreshBtn.disabled = false;
+  });
+}
 loadSongs();
 loadResults();
