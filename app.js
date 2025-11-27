@@ -204,6 +204,9 @@ function createApp() {
 
   app.get('/vote', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote.html')));
   app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+  
+  // Catch-all: redirige toute route inconnue vers index.html
+  app.get('*', (req, res) => res.redirect('/index.html'));
 
   return app;
 }
