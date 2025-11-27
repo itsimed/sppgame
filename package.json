@@ -1,0 +1,17 @@
+{
+  "name": "jeu-musical-classe",
+  "version": "1.0.0",
+  "description": "Application web simple pour jeu musical de classe (Node + Express)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["music", "game", "class", "express"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "nanoid": "^5.0.7",
+    "serverless-http": "^3.2.0"
+  }
+}

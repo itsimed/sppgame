@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Soumettre une chanson</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Soumettre une chanson</h1>
+    <nav>
+      <a href="/index.html">Accueil</a>
+      <a href="/register.html">Inscription</a>
+      <a href="/submit.html">Soumettre une chanson</a>
+      <a href="/vote.html">Vote</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Votre morceau préféré</h2>
+      <form id="songForm" class="grid">
+        <label for="title">Titre</label>
+        <input id="title" name="title" placeholder="Ex: Shape of You" required />
+        <label for="artist">Artiste</label>
+        <input id="artist" name="artist" placeholder="Ex: Ed Sheeran" required />
+        <label for="audioUrl">Lien audio (YouTube/Spotify/MP3, optionnel)</label>
+        <input id="audioUrl" name="audioUrl" placeholder="https://..." />
+        <button type="submit">Soumettre</button>
+      </form>
+      <p id="songMsg" class="small"></p>
+    </section>
+  </main>
+  <script src="/scripts/submit.js"></script>
+</body>
+</html>

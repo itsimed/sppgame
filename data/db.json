@@ -1,0 +1,37 @@
+{
+  "users": [
+    {
+      "id": "T9GhzKdz",
+      "firstName": "zhaoha"
+    },
+    {
+      "id": "SNi-SV-Q",
+      "firstName": "zeuibuibze"
+    }
+  ],
+  "songs": [
+    {
+      "id": "MwflI801tZ",
+      "userId": "T9GhzKdz",
+      "title": "iazhoiuh",
+      "artist": "zajijaz",
+      "audioUrl": ""
+    },
+    {
+      "id": "YkGXcyFEqY",
+      "userId": "SNi-SV-Q",
+      "title": "nzcuaaz",
+      "artist": "hzeuoheaz",
+      "audioUrl": ""
+    }
+  ],
+  "votes": [
+    {
+      "id": "6GC1G4EgQqQP",
+      "voterUserId": "SNi-SV-Q",
+      "songId": "MwflI801tZ",
+      "guessedUserId": "T9GhzKdz",
+      "isCorrect": true
+    }
+  ]
+}

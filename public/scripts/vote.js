@@ -1,0 +1,87 @@
+// Interface de vote
+// Les joueurs voient les chansons et la liste des prénoms, et choisissent
+
+async function loadData() {
+  const [usersRes, songsRes] = await Promise.all([
+    fetch('/api/users'),
+    fetch('/api/songs')
+  ]);
+  const users = await usersRes.json();
+  const songs = await songsRes.json();
+  renderVoting(users, songs);
+}
+
+function renderVoting(users, songs) {
+  const container = document.getElementById('voteContainer');
+  container.innerHTML = '';
+  const currentUserId = localStorage.getItem('userId');
+
+  songs.forEach(song => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const title = document.createElement('h3');
+    title.textContent = `${song.title} — ${song.artist}`;
+
+    // Lecteur audio simple si URL MP3, sinon afficher lien
+    const playerBox = document.createElement('div');
+    playerBox.className = 'player';
+    if (song.audioUrl && song.audioUrl.endsWith('.mp3')) {
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = song.audioUrl;
+      playerBox.appendChild(audio);
+    } else if (song.audioUrl) {
+      const a = document.createElement('a');
+      a.href = song.audioUrl;
+      a.target = '_blank';
+      a.textContent = 'Ouvrir le lien audio';
+      playerBox.appendChild(a);
+    }
+
+    const label = document.createElement('label');
+    label.textContent = 'À qui appartient cette chanson ?';
+    const select = document.createElement('select');
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Sélectionner un prénom';
+    select.appendChild(placeholder);
+
+    users.forEach(u => {
+      // Optionnel: ne pas lister le votant lui-même (mais on interdit via serveur de toute façon)
+      const opt = document.createElement('option');
+      opt.value = u.id;
+      opt.textContent = u.firstName;
+      select.appendChild(opt);
+    });
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Voter';
+    btn.addEventListener('click', async () => {
+      const guessedUserId = select.value;
+      const msg = document.getElementById('voteMsg');
+      msg.textContent = '';
+      if (!currentUserId) { msg.textContent = 'Veuillez vous inscrire/identifier d\'abord.'; return; }
+      if (!guessedUserId) { msg.textContent = 'Veuillez choisir un prénom.'; return; }
+      try {
+        const res = await fetch('/api/vote', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voterUserId: currentUserId, songId: song.id, guessedUserId })
+        });
+        const data = await res.json();
+        if (!res.ok) { msg.textContent = data.error || 'Erreur de vote'; return; }
+        msg.textContent = data.vote.isCorrect ? 'Bravo ! Bonne réponse.' : 'Raté, ce n\'est pas la bonne personne.';
+      } catch (err) {
+        msg.textContent = 'Erreur réseau';
+      }
+    });
+
+    card.appendChild(title);
+    card.appendChild(playerBox);
+    card.appendChild(label);
+    card.appendChild(select);
+    card.appendChild(btn);
+    container.appendChild(card);
+  });
+}
+
+loadData();

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Résultats</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Résultats</h1>
+    <nav>
+      <a href="/index.html">Accueil</a>
+      <a href="/register.html">Inscription</a>
+      <a href="/submit.html">Soumettre une chanson</a>
+      <a href="/vote.html">Vote</a>
+      <a href="/results.html">Résultats</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Scores et détails</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Scores par participant</h3>
+          <table class="table" id="scoresTable">
+            <thead><tr><th>Prénom</th><th>Score</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Détails des votes</h3>
+          <table class="table" id="votesTable">
+            <thead><tr><th>Votant</th><th>Chanson</th><th>Choix</th><th>Correct</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/scripts/results.js"></script>
+</body>
+</html>

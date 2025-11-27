@@ -1,0 +1,32 @@
+/* Style minimaliste, responsive et clair */
+:root {
+  --bg: #f8f9fb;
+  --fg: #222;
+  --muted: #666;
+  --primary: #2563eb;
+  --border: #e5e7eb;
+  --card: #ffffff;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+header { background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+header h1 { margin: 0; padding: 16px; font-size: 20px; }
+nav { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 16px; }
+nav a { color: var(--primary); text-decoration: none; padding: 6px 10px; border-radius: 6px; }
+nav a:hover { background: #eef2ff; }
+main { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+section, .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+label { display: block; margin: 8px 0 4px; }
+input, select, button, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; }
+button { background: var(--primary); color: #fff; cursor: pointer; }
+button:hover { filter: brightness(1.05); }
+.grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.list-item { padding: 10px; border: 1px dashed var(--border); border-radius: 8px; }
+.small { color: var(--muted); font-size: 12px; }
+footer { text-align: center; padding: 24px; color: var(--muted); }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+.table th { background: #f3f4f6; }
+.player { margin-top: 8px; }

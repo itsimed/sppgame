@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inscription</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Inscription</h1>
+    <nav>
+      <a href="/index.html">Accueil</a>
+      <a href="/register.html">Inscription</a>
+      <a href="/submit.html">Soumettre une chanson</a>
+      <a href="/vote.html">Vote</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Entrez votre prénom</h2>
+      <form id="registerForm" class="grid">
+        <label for="firstName">Prénom</label>
+        <input id="firstName" name="firstName" placeholder="Ex: Marie" required />
+        <button type="submit">S'inscrire</button>
+      </form>
+      <p id="registerMsg" class="small"></p>
+    </section>
+    <section>
+      <h3>Utilisateurs inscrits</h3>
+      <div id="usersList" class="list"></div>
+    </section>
+  </main>
+  <script src="/scripts/register.js"></script>
+</body>
+</html>

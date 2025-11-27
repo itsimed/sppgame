@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connexion Admin</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Connexion Administrateur</h1>
+    <nav>
+      <a href="/index.html">Accueil</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Entrez le code administrateur</h2>
+      <form id="adminLoginForm" class="grid">
+        <label for="adminCode">Code</label>
+        <input id="adminCode" name="adminCode" type="password" placeholder="Code admin" required />
+        <button type="submit">Se connecter</button>
+      </form>
+      <p id="adminLoginMsg" class="small"></p>
+    </section>
+  </main>
+  <script src="/scripts/admin-login.js"></script>
+</body>
+</html>
