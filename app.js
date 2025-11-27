@@ -54,6 +54,9 @@ function createApp() {
     return res.status(401).json({ error: 'Non autorisé' });
   }
 
+  // Favicon (évite erreur 500)
+  app.get('/favicon.ico', (req, res) => res.status(204).end());
+
   // API
   app.post('/api/admin/login', (req, res) => {
     const { code } = req.body || {};
