@@ -137,7 +137,8 @@ function createApp() {
 
   // Pages
   // Admin protégé -> sert le fichier depuis /views pour ne pas l'exposer en statique
-  app.get(['/admin', '/admin.html'], requireAdmin, (req, res) => {
+  // Ajoute les variantes /api/admin* pour support via rewrite Vercel
+  app.get(['/admin', '/admin.html', '/api/admin', '/api/admin.html'], requireAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin.html'));
   });
 
