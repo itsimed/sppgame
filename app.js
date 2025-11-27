@@ -136,10 +136,66 @@ function createApp() {
   });
 
   // Pages
-  // Admin protégé -> sert le fichier depuis /views pour ne pas l'exposer en statique
+  // Admin protégé -> renvoie l'HTML directement (évite l'accès fichier en serverless)
   // Ajoute les variantes /api/admin* pour support via rewrite Vercel
+  const adminHtml = () => `<!DOCTYPE html>
+  <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Administration</h1>
+      <nav>
+        <a href="/index.html">Accueil</a>
+        <a href="/register.html">Inscription</a>
+        <a href="/submit.html">Soumettre une chanson</a>
+        <a href="/vote.html">Vote</a>
+        <a href="/admin">Admin</a>
+      </nav>
+    </header>
+    <main>
+      <section class="grid">
+        <div class="card">
+          <h2>Chansons soumises</h2>
+          <div id="songsList" class="list"></div>
+        </div>
+        <div class="card">
+          <h2>Actions</h2>
+          <button id="resetBtn">Réinitialiser chansons et votes</button>
+          <p id="adminMsg" class="small"></p>
+        </div>
+        <div class="card">
+          <h2>Résultats</h2>
+          <div class="grid">
+            <div>
+              <h3>Scores par participant</h3>
+              <table class="table" id="scoresTableAdmin">
+                <thead><tr><th>Prénom</th><th>Score</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div>
+              <h3>Détails des votes</h3>
+              <table class="table" id="votesTableAdmin">
+                <thead><tr><th>Votant</th><th>Chanson</th><th>Choix</th><th>Correct</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <button id="refreshResultsBtn">Rafraîchir les résultats</button>
+        </div>
+      </section>
+    </main>
+    <script src="/scripts/admin.js"></script>
+  </body>
+  </html>`;
+
   app.get(['/admin', '/admin.html', '/api/admin', '/api/admin.html'], requireAdmin, (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'admin.html'));
+    res.set('Content-Type', 'text/html; charset=utf-8').send(adminHtml());
   });
 
   // Servir statiques depuis /public (utile en local; sur Vercel, les fichiers sont servis par la plateforme)
