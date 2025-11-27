@@ -1,14 +1,8 @@
 // Construction de l'application Express (réutilisable en local et sur Vercel)
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const { nanoid } = require('nanoid');
-
-// Stockage global partagé entre toutes les instances sur Vercel (en mémoire)
-const DATA_DIR = path.join(__dirname, 'data');
-const DB_FILE = path.join(DATA_DIR, 'db.json');
-const USE_MEMORY = !!process.env.VERCEL;
-let memoryDB = { users: [], songs: [], votes: [] };
+const db = require('./db');
 
 // Singleton global pour l'app Express
 let appInstance = null;
@@ -21,24 +15,6 @@ function createApp() {
   // Middleware
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
-  function ensureDataFile() {
-    if (USE_MEMORY) return; // pas de fichier sur Vercel
-    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-    if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify({ users: [], songs: [], votes: [] }, null, 2));
-  }
-
-  function loadDB() {
-    if (USE_MEMORY) return memoryDB;
-    ensureDataFile();
-    const raw = fs.readFileSync(DB_FILE, 'utf-8');
-    return JSON.parse(raw);
-  }
-
-  function saveDB(db) {
-    if (USE_MEMORY) { memoryDB = db; return; }
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
-  }
 
   // Cookies / Auth admin simple
   function parseCookies(req) {
@@ -72,75 +48,115 @@ function createApp() {
     return res.status(401).json({ error: 'Code incorrect' });
   });
 
-  app.post('/api/register', (req, res) => {
-    const { firstName } = req.body;
-    if (!firstName || typeof firstName !== 'string' || !firstName.trim()) {
-      return res.status(400).json({ error: 'Prénom invalide' });
+  app.post('/api/register', async (req, res) => {
+    try {
+      const { firstName } = req.body;
+      if (!firstName || typeof firstName !== 'string' || !firstName.trim()) {
+        return res.status(400).json({ error: 'Prénom invalide' });
+      }
+      const exists = await db.findUserByFirstName(firstName.trim());
+      if (exists) return res.status(409).json({ error: 'Ce prénom est déjà inscrit' });
+      const user = { id: nanoid(8), firstName: firstName.trim() };
+      await db.createUser(user);
+      res.json({ success: true, user });
+    } catch (err) {
+      console.error('Erreur register:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
     }
-    const db = loadDB();
-    const exists = db.users.find(u => u.firstName.toLowerCase() === firstName.trim().toLowerCase());
-    if (exists) return res.status(409).json({ error: 'Ce prénom est déjà inscrit' });
-    const user = { id: nanoid(8), firstName: firstName.trim() };
-    db.users.push(user);
-    saveDB(db);
-    res.json({ success: true, user });
   });
 
-  app.get('/api/users', (req, res) => {
-    const db = loadDB();
-    res.json(db.users);
+  app.get('/api/users', async (req, res) => {
+    try {
+      const users = await db.getUsers();
+      res.json(users);
+    } catch (err) {
+      console.error('Erreur get users:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
   });
 
-  app.post('/api/submit-song', (req, res) => {
-    const { userId, title, artist, audioUrl } = req.body;
-    if (!userId || !title || !artist) return res.status(400).json({ error: 'Champs requis manquants' });
-    const db = loadDB();
-    const user = db.users.find(u => u.id === userId);
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-    const already = db.songs.find(s => s.userId === userId);
-    if (already) return res.status(409).json({ error: 'Cet utilisateur a déjà soumis une chanson' });
-    const song = { id: nanoid(10), userId, title: title.trim(), artist: artist.trim(), audioUrl: audioUrl ? String(audioUrl).trim() : '' };
-    db.songs.push(song);
-    saveDB(db);
-    res.json({ success: true, song });
+  app.post('/api/submit-song', async (req, res) => {
+    try {
+      const { userId, title, artist, audioUrl } = req.body;
+      if (!userId || !title || !artist) return res.status(400).json({ error: 'Champs requis manquants' });
+      const user = await db.findUserById(userId);
+      if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+      const already = await db.findSongByUserId(userId);
+      if (already) return res.status(409).json({ error: 'Cet utilisateur a déjà soumis une chanson' });
+      const song = { id: nanoid(10), userId, title: title.trim(), artist: artist.trim(), audioUrl: audioUrl ? String(audioUrl).trim() : '' };
+      await db.createSong(song);
+      res.json({ success: true, song });
+    } catch (err) {
+      console.error('Erreur submit song:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
   });
 
-  app.get('/api/songs', (req, res) => {
-    const db = loadDB();
-    res.json(db.songs);
+  app.get('/api/songs', async (req, res) => {
+    try {
+      const songs = await db.getSongs();
+      res.json(songs);
+    } catch (err) {
+      console.error('Erreur get songs:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
   });
 
-  app.post('/api/vote', (req, res) => {
-    const { voterUserId, songId, guessedUserId } = req.body;
-    if (!voterUserId || !songId || !guessedUserId) return res.status(400).json({ error: 'Champs requis manquants' });
-    const db = loadDB();
-    const voter = db.users.find(u => u.id === voterUserId);
-    const song = db.songs.find(s => s.id === songId);
-    const guessed = db.users.find(u => u.id === guessedUserId);
-    if (!voter || !song || !guessed) return res.status(404).json({ error: 'Utilisateur ou chanson introuvable' });
-    if (song.userId === voterUserId) return res.status(400).json({ error: 'Vous ne pouvez pas voter pour votre propre chanson' });
-    const existing = db.votes.find(v => v.voterUserId === voterUserId && v.songId === songId);
-    if (existing) return res.status(409).json({ error: 'Vous avez déjà voté pour cette chanson' });
-    const isCorrect = guessedUserId === song.userId;
-    const vote = { id: nanoid(12), voterUserId, songId, guessedUserId, isCorrect };
-    db.votes.push(vote);
-    saveDB(db);
-    const voterScore = db.votes.filter(v => v.voterUserId === voterUserId && v.isCorrect).length;
-    res.json({ success: true, vote, voterScore });
+  app.post('/api/vote', async (req, res) => {
+    try {
+      const { voterUserId, songId, guessedUserId } = req.body;
+      if (!voterUserId || !songId || !guessedUserId) return res.status(400).json({ error: 'Champs requis manquants' });
+      const [voter, song, guessed] = await Promise.all([
+        db.findUserById(voterUserId),
+        db.findSongById(songId),
+        db.findUserById(guessedUserId)
+      ]);
+      if (!voter || !song || !guessed) return res.status(404).json({ error: 'Utilisateur ou chanson introuvable' });
+      if (song.userId === voterUserId) return res.status(400).json({ error: 'Vous ne pouvez pas voter pour votre propre chanson' });
+      const existing = await db.findVote(voterUserId, songId);
+      if (existing) return res.status(409).json({ error: 'Vous avez déjà voté pour cette chanson' });
+      const isCorrect = guessedUserId === song.userId;
+      const vote = { id: nanoid(12), voterUserId, songId, guessedUserId, isCorrect };
+      await db.createVote(vote);
+      const allVotes = await db.getVotes();
+      const voterScore = allVotes.filter(v => v.voterUserId === voterUserId && v.isCorrect).length;
+      res.json({ success: true, vote, voterScore });
+    } catch (err) {
+      console.error('Erreur vote:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
   });
 
-  app.get('/api/results', (req, res) => {
-    const db = loadDB();
-    const scores = db.users.map(u => ({ userId: u.id, firstName: u.firstName, score: db.votes.filter(v => v.voterUserId === u.id && v.isCorrect).length }));
-    res.json({ users: db.users, songs: db.songs, votes: db.votes, scores });
+  app.get('/api/results', async (req, res) => {
+    try {
+      const [users, songs, votes] = await Promise.all([
+        db.getUsers(),
+        db.getSongs(),
+        db.getVotes()
+      ]);
+      const scores = users.map(u => ({ 
+        userId: u.id, 
+        firstName: u.firstName, 
+        score: votes.filter(v => v.voterUserId === u.id && v.isCorrect).length 
+      }));
+      res.json({ users, songs, votes, scores });
+    } catch (err) {
+      console.error('Erreur results:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
   });
 
-  app.post('/api/reset', requireAdmin, (req, res) => {
-    const db = loadDB();
-    db.songs = [];
-    db.votes = [];
-    saveDB(db);
-    res.json({ success: true });
+  app.post('/api/reset', requireAdmin, async (req, res) => {
+    try {
+      await Promise.all([
+        db.deleteAllSongs(),
+        db.deleteAllVotes()
+      ]);
+      res.json({ success: true });
+    } catch (err) {
+      console.error('Erreur reset:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
   });
 
   // Pages
