@@ -173,13 +173,6 @@ function createApp() {
   <body>
     <header>
       <h1>Administration</h1>
-      <nav>
-        <a href="/index.html">Accueil</a>
-        <a href="/register.html">Inscription</a>
-        <a href="/submit.html">Soumettre une chanson</a>
-        <a href="/vote.html">Vote</a>
-        <a href="/admin">Admin</a>
-      </nav>
     </header>
     <main>
       <section class="grid">
