@@ -216,6 +216,11 @@ function startCountdown(remaining) {
         msg.textContent = 'Temps écoulé ! Vous n\'avez pas voté.';
         msg.style.color = '#dc2626';
       }
+      
+      // Réinitialiser hasVoted pour permettre le vote suivant
+      setTimeout(() => {
+        hasVoted = false;
+      }, 2000);
     }
   };
   
