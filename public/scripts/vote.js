@@ -27,15 +27,18 @@ function renderVoting(users, songs) {
     container.appendChild(welcomeMsg);
   }
 
-  if (songs.length === 0) {
+  // Filtrer les chansons : exclure la chanson de l'utilisateur connecté
+  const songsToVote = songs.filter(song => song.userId !== currentUserId);
+
+  if (songsToVote.length === 0) {
     const emptyMsg = document.createElement('p');
-    emptyMsg.textContent = 'Aucune chanson soumise pour le moment.';
+    emptyMsg.textContent = 'Aucune chanson disponible pour voter.';
     emptyMsg.className = 'small';
     container.appendChild(emptyMsg);
     return;
   }
 
-  songs.forEach(song => {
+  songsToVote.forEach(song => {
     const card = document.createElement('div');
     card.className = 'card';
     const title = document.createElement('h3');
