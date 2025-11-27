@@ -9,7 +9,12 @@ let cachedClient = null;
 let cachedDb = null;
 
 // Fallback en mémoire si MongoDB n'est pas disponible
-let memoryDB = { users: [], songs: [], votes: [] };
+let memoryDB = { 
+  users: [], 
+  songs: [], 
+  votes: [],
+  activeVoteSession: null // { songId, startTime, duration: 20000 }
+};
 let mongoFailed = false;
 
 async function connectToDatabase() {
@@ -178,6 +183,38 @@ async function deleteAllUsers() {
   }
 }
 
+// Gestion de la session de vote active
+async function getActiveVoteSession() {
+  const collection = await getCollection('voteSessions');
+  if (collection) {
+    return await collection.findOne({ active: true });
+  }
+  return memoryDB.activeVoteSession;
+}
+
+async function setActiveVoteSession(session) {
+  const collection = await getCollection('voteSessions');
+  if (collection) {
+    // Désactiver toutes les anciennes sessions
+    await collection.updateMany({}, { $set: { active: false } });
+    if (session) {
+      await collection.insertOne({ ...session, active: true });
+    }
+  } else {
+    memoryDB.activeVoteSession = session;
+  }
+  return session;
+}
+
+async function clearActiveVoteSession() {
+  const collection = await getCollection('voteSessions');
+  if (collection) {
+    await collection.updateMany({}, { $set: { active: false } });
+  } else {
+    memoryDB.activeVoteSession = null;
+  }
+}
+
 module.exports = {
   connectToDatabase,
   getUsers,
@@ -194,4 +231,7 @@ module.exports = {
   deleteAllSongs,
   deleteAllVotes,
   deleteAllUsers,
+  getActiveVoteSession,
+  setActiveVoteSession,
+  clearActiveVoteSession,
 };

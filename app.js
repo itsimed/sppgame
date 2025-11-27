@@ -151,11 +151,78 @@ function createApp() {
       await Promise.all([
         db.deleteAllUsers(),
         db.deleteAllSongs(),
-        db.deleteAllVotes()
+        db.deleteAllVotes(),
+        db.clearActiveVoteSession()
       ]);
       res.json({ success: true });
     } catch (err) {
       console.error('Erreur reset:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
+
+  // Session de vote en temps réel
+  app.post('/api/start-vote', requireAdmin, async (req, res) => {
+    try {
+      const { songId } = req.body;
+      if (!songId) return res.status(400).json({ error: 'songId requis' });
+      
+      const song = await db.findSongById(songId);
+      if (!song) return res.status(404).json({ error: 'Chanson introuvable' });
+      
+      const session = {
+        songId,
+        startTime: Date.now(),
+        duration: 20000 // 20 secondes
+      };
+      
+      await db.setActiveVoteSession(session);
+      res.json({ success: true, session });
+    } catch (err) {
+      console.error('Erreur start-vote:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
+
+  app.get('/api/active-vote', async (req, res) => {
+    try {
+      const session = await db.getActiveVoteSession();
+      
+      if (!session) {
+        return res.json({ active: false });
+      }
+      
+      const elapsed = Date.now() - session.startTime;
+      const remaining = Math.max(0, session.duration - elapsed);
+      
+      if (remaining === 0) {
+        // Session expirée, la désactiver
+        await db.clearActiveVoteSession();
+        return res.json({ active: false });
+      }
+      
+      const song = await db.findSongById(session.songId);
+      
+      res.json({
+        active: true,
+        songId: session.songId,
+        song,
+        startTime: session.startTime,
+        duration: session.duration,
+        remaining
+      });
+    } catch (err) {
+      console.error('Erreur active-vote:', err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
+
+  app.post('/api/stop-vote', requireAdmin, async (req, res) => {
+    try {
+      await db.clearActiveVoteSession();
+      res.json({ success: true });
+    } catch (err) {
+      console.error('Erreur stop-vote:', err);
       res.status(500).json({ error: 'Erreur serveur' });
     }
   });

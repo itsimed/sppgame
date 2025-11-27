@@ -1,5 +1,8 @@
 // Interface administrateur: voir chansons, jouer lien/MP3, reset, et résultats
 
+let currentVoteSession = null;
+let countdownInterval = null;
+
 async function loadSongs() {
   const [usersRes, songsRes] = await Promise.all([
     fetch('/api/users'),
@@ -11,12 +14,30 @@ async function loadSongs() {
   const box = document.getElementById('songsList');
   box.innerHTML = '';
 
+  if (songs.length === 0) {
+    const emptyMsg = document.createElement('p');
+    emptyMsg.className = 'small';
+    emptyMsg.textContent = 'Aucune chanson soumise';
+    box.appendChild(emptyMsg);
+    return;
+  }
+
   songs.forEach(s => {
     const owner = users.find(u => u.id === s.userId);
     const item = document.createElement('div');
     item.className = 'list-item';
+    item.style.display = 'flex';
+    item.style.justifyContent = 'space-between';
+    item.style.alignItems = 'center';
+    item.style.gap = '16px';
+    
+    const infoDiv = document.createElement('div');
+    infoDiv.style.flex = '1';
+    
     const title = document.createElement('div');
     title.textContent = `${s.title} — ${s.artist} (par ${owner ? owner.firstName : '—'})`;
+    title.style.fontWeight = 'bold';
+    title.style.marginBottom = '8px';
 
     const player = document.createElement('div');
     player.className = 'player';
@@ -38,8 +59,18 @@ async function loadSongs() {
       player.appendChild(small);
     }
 
-    item.appendChild(title);
-    item.appendChild(player);
+    infoDiv.appendChild(title);
+    infoDiv.appendChild(player);
+
+    // Bouton pour lancer le vote
+    const voteBtn = document.createElement('button');
+    voteBtn.textContent = '▶ Lancer le vote';
+    voteBtn.style.backgroundColor = '#2563eb';
+    voteBtn.style.whiteSpace = 'nowrap';
+    voteBtn.addEventListener('click', () => startVote(s.id));
+
+    item.appendChild(infoDiv);
+    item.appendChild(voteBtn);
     box.appendChild(item);
   });
 }
@@ -201,5 +232,79 @@ if (refreshBtn) {
     refreshBtn.disabled = false;
   });
 }
+
+// Gestion du vote en temps réel
+async function startVote(songId) {
+  const msg = document.getElementById('adminMsg');
+  msg.textContent = '';
+  
+  try {
+    const res = await fetch('/api/start-vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ songId })
+    });
+    const data = await res.json();
+    
+    if (!res.ok) {
+      msg.textContent = data.error || 'Erreur';
+      msg.style.color = '#dc2626';
+      return;
+    }
+    
+    msg.textContent = '✅ Vote lancé ! Les utilisateurs ont 20 secondes pour voter.';
+    msg.style.color = '#16a34a';
+    
+    currentVoteSession = data.session;
+    startCountdown();
+    
+  } catch (err) {
+    msg.textContent = 'Erreur réseau';
+    msg.style.color = '#dc2626';
+  }
+}
+
+function startCountdown() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  
+  const msg = document.getElementById('adminMsg');
+  const updateCountdown = () => {
+    if (!currentVoteSession) return;
+    
+    const elapsed = Date.now() - currentVoteSession.startTime;
+    const remaining = Math.max(0, currentVoteSession.duration - elapsed);
+    const seconds = Math.ceil(remaining / 1000);
+    
+    if (seconds > 0) {
+      msg.textContent = `⏱️ Vote en cours... ${seconds}s restantes`;
+      msg.style.color = '#2563eb';
+    } else {
+      msg.textContent = '✅ Vote terminé !';
+      msg.style.color = '#16a34a';
+      clearInterval(countdownInterval);
+      currentVoteSession = null;
+      loadResults(); // Rafraîchir les résultats
+    }
+  };
+  
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 100);
+}
+
+async function stopVote() {
+  try {
+    await fetch('/api/stop-vote', { method: 'POST' });
+    const msg = document.getElementById('adminMsg');
+    msg.textContent = '🛑 Vote arrêté';
+    msg.style.color = '#dc2626';
+    
+    if (countdownInterval) clearInterval(countdownInterval);
+    currentVoteSession = null;
+    
+  } catch (err) {
+    console.error('Erreur stop-vote:', err);
+  }
+}
+
 loadSongs();
 loadResults();
