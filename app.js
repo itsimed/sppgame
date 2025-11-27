@@ -203,11 +203,8 @@ function createApp() {
               </table>
             </div>
             <div>
-              <h3>Détails des votes</h3>
-              <table class="table" id="votesTableAdmin">
-                <thead><tr><th>Votant</th><th>Chanson</th><th>Choix</th><th>Correct</th></tr></thead>
-                <tbody></tbody>
-              </table>
+              <h3>Détails des votes par chanson</h3>
+              <div id="votesContainer"></div>
             </div>
           </div>
           <button id="refreshResultsBtn">Rafraîchir les résultats</button>
