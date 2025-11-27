@@ -4,18 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const { nanoid } = require('nanoid');
 
+// Stockage global partagé entre toutes les instances sur Vercel (en mémoire)
+const DATA_DIR = path.join(__dirname, 'data');
+const DB_FILE = path.join(DATA_DIR, 'db.json');
+const USE_MEMORY = !!process.env.VERCEL;
+let memoryDB = { users: [], songs: [], votes: [] };
+
 function createApp() {
   const app = express();
 
   // Middleware
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
-  // Stockage: fichier local (dev) ou mémoire (Vercel)
-  const DATA_DIR = path.join(__dirname, 'data');
-  const DB_FILE = path.join(DATA_DIR, 'db.json');
-  const USE_MEMORY = !!process.env.VERCEL; // Sur Vercel, on utilise une base en mémoire (temporaire)
-  let memoryDB = { users: [], songs: [], votes: [] };
 
   function ensureDataFile() {
     if (USE_MEMORY) return; // pas de fichier sur Vercel
