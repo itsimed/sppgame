@@ -10,7 +10,12 @@ const DB_FILE = path.join(DATA_DIR, 'db.json');
 const USE_MEMORY = !!process.env.VERCEL;
 let memoryDB = { users: [], songs: [], votes: [] };
 
+// Singleton global pour l'app Express
+let appInstance = null;
+
 function createApp() {
+  if (appInstance) return appInstance;
+  
   const app = express();
 
   // Middleware
@@ -205,12 +210,16 @@ function createApp() {
   // IMPORTANT: placé après la route /admin.html pour éviter un contournement via le fichier statique
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.get('/vote', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote.html')));
+  // Route racine explicite
   app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-  
-  // Catch-all: redirige toute route inconnue vers index.html
-  app.get('*', (req, res) => res.redirect('/index.html'));
 
+  // Gestionnaire d'erreurs global
+  app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ error: 'Erreur serveur interne' });
+  });
+
+  appInstance = app;
   return app;
 }
 
