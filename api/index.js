@@ -1,8 +1,9 @@
 // Handler serverless pour Vercel: adapter Express à la signature (req, res)
 const { createApp } = require('../app');
 
-const app = createApp();
-
+// Singleton: réutilise la même instance d'app pour les invocations "warm"
+let app;
 module.exports = (req, res) => {
-	return app(req, res);
+  if (!app) app = createApp();
+  return app(req, res);
 };
