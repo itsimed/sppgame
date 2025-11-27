@@ -2,6 +2,24 @@
 // Les joueurs voient les chansons et la liste des prénoms, et choisissent
 
 async function loadData() {
+  const currentUserId = localStorage.getItem('userId');
+  
+  // Vérifier que l'utilisateur existe en base avant d'afficher le vote
+  if (currentUserId) {
+    const usersRes = await fetch('/api/users');
+    const users = await usersRes.json();
+    const userExists = users.find(u => u.id === currentUserId);
+    
+    if (!userExists) {
+      // L'utilisateur n'existe plus en base (cold start Vercel), on réinitialise
+      localStorage.removeItem('userId');
+      localStorage.removeItem('firstName');
+      alert('Votre session a expiré. Veuillez vous réinscrire.');
+      window.location.href = '/register.html';
+      return;
+    }
+  }
+  
   const [usersRes, songsRes] = await Promise.all([
     fetch('/api/users'),
     fetch('/api/songs')
@@ -79,7 +97,11 @@ function renderVoting(users, songs) {
       const guessedUserId = select.value;
       const msg = document.getElementById('voteMsg');
       msg.textContent = '';
-      if (!currentUserId) { msg.textContent = 'Veuillez vous inscrire/identifier d\'abord.'; return; }
+      if (!currentUserId) { 
+        msg.textContent = 'Veuillez vous inscrire d\'abord.'; 
+        setTimeout(() => window.location.href = '/register.html', 2000);
+        return; 
+      }
       if (!guessedUserId) { msg.textContent = 'Veuillez choisir un prénom.'; return; }
       try {
         const res = await fetch('/api/vote', {
@@ -87,7 +109,18 @@ function renderVoting(users, songs) {
           body: JSON.stringify({ voterUserId: currentUserId, songId: song.id, guessedUserId })
         });
         const data = await res.json();
-        if (!res.ok) { msg.textContent = data.error || 'Erreur de vote'; return; }
+        if (!res.ok) { 
+          // Si l'utilisateur n'existe plus, on le redirige
+          if (res.status === 404 && data.error.includes('introuvable')) {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('firstName');
+            alert('Votre session a expiré. Veuillez vous réinscrire.');
+            window.location.href = '/register.html';
+            return;
+          }
+          msg.textContent = data.error || 'Erreur de vote'; 
+          return; 
+        }
         msg.textContent = data.vote.isCorrect ? 'Bravo ! Bonne réponse.' : 'Raté, ce n\'est pas la bonne personne.';
       } catch (err) {
         msg.textContent = 'Erreur réseau';
