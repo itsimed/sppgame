@@ -112,9 +112,28 @@ function renderVoting(users, songs) {
           btn.disabled = false;
           return; 
         }
-        msg.textContent = data.vote.isCorrect ? 'Bravo ! Bonne réponse.' : 'Raté, ce n\'est pas la bonne personne.';
+        
+        // Changer la couleur du bouton selon le résultat
         btn.classList.remove('loading');
-        btn.disabled = false;
+        
+        // Trouver le propriétaire de la chanson
+        const songOwner = users.find(u => u.id === song.userId);
+        const ownerName = songOwner ? songOwner.firstName : 'Inconnu';
+        
+        if (data.vote.isCorrect) {
+          btn.style.backgroundColor = '#16a34a'; // Vert
+          btn.textContent = `✓ C'est la chanson de ${ownerName}`;
+          msg.textContent = 'Bravo ! Bonne réponse.';
+          msg.style.color = '#16a34a';
+        } else {
+          btn.style.backgroundColor = '#dc2626'; // Rouge
+          btn.textContent = `✗ C'est la chanson de ${ownerName}`;
+          msg.textContent = 'Raté, ce n\'est pas la bonne personne.';
+          msg.style.color = '#dc2626';
+        }
+        // Désactiver le bouton et le select après le vote
+        btn.disabled = true;
+        select.disabled = true;
       } catch (err) {
         msg.textContent = 'Erreur réseau';
         btn.classList.remove('loading');
