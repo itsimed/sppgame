@@ -3,35 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Soumettre une chanson</title>
+  <title>Étape 2 : Votre chanson</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header>
-    <h1>Soumettre une chanson</h1>
-    <nav>
-      <a href="/index.html">Accueil</a>
-      <a href="/register.html">Inscription</a>
-      <a href="/submit.html">Soumettre une chanson</a>
-      <a href="/vote.html">Vote</a>
-      <a href="/admin">Admin</a>
-    </nav>
+    <h1>Jeu musical de classe</h1>
   </header>
   <main>
     <section>
-      <h2>Votre morceau préféré</h2>
+      <h2>Étape 2 : Votre morceau préféré</h2>
       <form id="songForm" class="grid">
         <label for="title">Titre</label>
-        <input id="title" name="title" placeholder="Ex: Shape of You" required />
+        <input id="title" name="title" placeholder="Ex: Shape of You" required autofocus />
         <label for="artist">Artiste</label>
         <input id="artist" name="artist" placeholder="Ex: Ed Sheeran" required />
         <label for="audioUrl">Lien audio (YouTube/Spotify/MP3, optionnel)</label>
         <input id="audioUrl" name="audioUrl" placeholder="https://..." />
-        <button type="submit">Soumettre</button>
+        <button type="submit">Continuer vers le vote</button>
       </form>
       <p id="songMsg" class="small"></p>
     </section>
   </main>
+  <footer>
+    <small>&copy; 2025 Jeu Musical de Classe</small>
+  </footer>
   <script src="/scripts/submit.js"></script>
 </body>
 </html>

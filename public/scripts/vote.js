@@ -15,6 +15,25 @@ function renderVoting(users, songs) {
   const container = document.getElementById('voteContainer');
   container.innerHTML = '';
   const currentUserId = localStorage.getItem('userId');
+  const currentFirstName = localStorage.getItem('firstName');
+
+  // Afficher le nom de l'utilisateur connecté
+  if (currentFirstName) {
+    const welcomeMsg = document.createElement('p');
+    welcomeMsg.textContent = `Connecté en tant que: ${currentFirstName}`;
+    welcomeMsg.style.color = '#2563eb';
+    welcomeMsg.style.fontWeight = 'bold';
+    welcomeMsg.style.marginBottom = '16px';
+    container.appendChild(welcomeMsg);
+  }
+
+  if (songs.length === 0) {
+    const emptyMsg = document.createElement('p');
+    emptyMsg.textContent = 'Aucune chanson soumise pour le moment.';
+    emptyMsg.className = 'small';
+    container.appendChild(emptyMsg);
+    return;
+  }
 
   songs.forEach(song => {
     const card = document.createElement('div');

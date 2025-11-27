@@ -3,35 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Inscription</title>
+  <title>Étape 1 : Inscription</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header>
-    <h1>Inscription</h1>
-    <nav>
-      <a href="/index.html">Accueil</a>
-      <a href="/register.html">Inscription</a>
-      <a href="/submit.html">Soumettre une chanson</a>
-      <a href="/vote.html">Vote</a>
-      <a href="/admin">Admin</a>
-    </nav>
+    <h1>Jeu musical de classe</h1>
   </header>
   <main>
     <section>
-      <h2>Entrez votre prénom</h2>
+      <h2>Étape 1 : Entrez votre prénom</h2>
       <form id="registerForm" class="grid">
         <label for="firstName">Prénom</label>
-        <input id="firstName" name="firstName" placeholder="Ex: Marie" required />
-        <button type="submit">S'inscrire</button>
+        <input id="firstName" name="firstName" placeholder="Ex: Marie" required autofocus />
+        <button type="submit">Continuer</button>
       </form>
       <p id="registerMsg" class="small"></p>
     </section>
-    <section>
-      <h3>Utilisateurs inscrits</h3>
-      <div id="usersList" class="list"></div>
-    </section>
   </main>
+  <footer>
+    <small>&copy; 2025 Jeu Musical de Classe</small>
+  </footer>
   <script src="/scripts/register.js"></script>
 </body>
 </html>

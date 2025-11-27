@@ -5,6 +5,7 @@ async function fetchUsers() {
   const res = await fetch('/api/users');
   const users = await res.json();
   const box = document.getElementById('usersList');
+  if (!box) return; // Si l'élément n'existe pas, on skip
   box.innerHTML = '';
   users.forEach(u => {
     const div = document.createElement('div');
@@ -29,12 +30,14 @@ async function register(e) {
     if (!res.ok) { msg.textContent = data.error || 'Erreur d\'inscription'; return; }
     localStorage.setItem('userId', data.user.id);
     localStorage.setItem('firstName', data.user.firstName);
-    msg.textContent = `Inscription réussie: ${data.user.firstName}`;
-    await fetchUsers();
+    // Redirection automatique vers la soumission de chanson
+    window.location.href = '/submit.html';
   } catch (err) {
     msg.textContent = 'Erreur réseau';
   }
 }
 
 document.getElementById('registerForm').addEventListener('submit', register);
-fetchUsers();
+if (document.getElementById('usersList')) {
+  fetchUsers();
+}
