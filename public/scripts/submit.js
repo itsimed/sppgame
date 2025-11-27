@@ -42,36 +42,13 @@ async function submitSong(e) {
 document.getElementById('songForm').addEventListener('submit', submitSong);
 
 // Vérifier si l'utilisateur est connecté au chargement
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('DOMContentLoaded', () => {
   const userId = localStorage.getItem('userId');
   const firstName = localStorage.getItem('firstName');
   const msg = document.getElementById('songMsg');
   
   if (userId && firstName) {
-    // Vérifier que l'utilisateur existe toujours en base
-    try {
-      const res = await fetch('/api/users');
-      const users = await res.json();
-      const userExists = users.find(u => u.id === userId);
-      
-      if (!userExists) {
-        localStorage.removeItem('userId');
-        localStorage.removeItem('firstName');
-        msg.textContent = 'Session expirée. Redirection...';
-        msg.style.color = '#dc2626';
-        setTimeout(() => window.location.href = '/register.html', 2000);
-        return;
-      }
-      
-      msg.textContent = `Connecté en tant que: ${firstName}`;
-      msg.style.color = '#2563eb';
-    } catch (err) {
-      msg.textContent = 'Erreur de connexion';
-      msg.style.color = '#dc2626';
-    }
-  } else {
-    msg.textContent = 'Veuillez vous inscrire d\'abord. Redirection...';
-    msg.style.color = '#dc2626';
-    setTimeout(() => window.location.href = '/register.html', 2000);
+    msg.textContent = `Connecté en tant que: ${firstName}`;
+    msg.style.color = '#2563eb';
   }
 });

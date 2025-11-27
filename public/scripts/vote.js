@@ -2,24 +2,6 @@
 // Les joueurs voient les chansons et la liste des prénoms, et choisissent
 
 async function loadData() {
-  const currentUserId = localStorage.getItem('userId');
-  
-  // Vérifier que l'utilisateur existe en base avant d'afficher le vote
-  if (currentUserId) {
-    const usersRes = await fetch('/api/users');
-    const users = await usersRes.json();
-    const userExists = users.find(u => u.id === currentUserId);
-    
-    if (!userExists) {
-      // L'utilisateur n'existe plus en base (cold start Vercel), on réinitialise
-      localStorage.removeItem('userId');
-      localStorage.removeItem('firstName');
-      alert('Votre session a expiré. Veuillez vous réinscrire.');
-      window.location.href = '/register.html';
-      return;
-    }
-  }
-  
   const [usersRes, songsRes] = await Promise.all([
     fetch('/api/users'),
     fetch('/api/songs')
