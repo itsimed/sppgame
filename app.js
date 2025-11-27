@@ -149,6 +149,7 @@ function createApp() {
   app.post('/api/reset', requireAdmin, async (req, res) => {
     try {
       await Promise.all([
+        db.deleteAllUsers(),
         db.deleteAllSongs(),
         db.deleteAllVotes()
       ]);
@@ -182,7 +183,7 @@ function createApp() {
         </div>
         <div class="card">
           <h2>Actions</h2>
-          <button id="resetBtn">Réinitialiser chansons et votes</button>
+          <button id="resetBtn">Réinitialiser TOUT (utilisateurs, chansons, votes)</button>
           <p id="adminMsg" class="small"></p>
         </div>
         <div class="card">

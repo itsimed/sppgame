@@ -169,6 +169,15 @@ async function deleteAllVotes() {
   }
 }
 
+async function deleteAllUsers() {
+  const collection = await getCollection('users');
+  if (collection) {
+    await collection.deleteMany({});
+  } else {
+    memoryDB.users = [];
+  }
+}
+
 module.exports = {
   connectToDatabase,
   getUsers,
@@ -184,4 +193,5 @@ module.exports = {
   createVote,
   deleteAllSongs,
   deleteAllVotes,
+  deleteAllUsers,
 };
