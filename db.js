@@ -13,7 +13,8 @@ let memoryDB = {
   users: [], 
   songs: [], 
   votes: [],
-  activeVoteSession: null // { songId, startTime, duration: 20000 }
+  activeVoteSession: null, // { songId, startTime, duration: 20000 }
+  playedSongs: [] // Liste des IDs de chansons déjà jouées
 };
 let mongoFailed = false;
 
@@ -203,6 +204,12 @@ async function setActiveVoteSession(session) {
   } else {
     memoryDB.activeVoteSession = session;
   }
+  
+  // Ajouter la chanson à la liste des chansons jouées
+  if (session && session.songId) {
+    await addPlayedSong(session.songId);
+  }
+  
   return session;
 }
 
@@ -212,6 +219,40 @@ async function clearActiveVoteSession() {
     await collection.updateMany({}, { $set: { active: false } });
   } else {
     memoryDB.activeVoteSession = null;
+  }
+}
+
+// Gestion des chansons jouées
+async function getPlayedSongs() {
+  const collection = await getCollection('playedSongs');
+  if (collection) {
+    const docs = await collection.find({}).toArray();
+    return docs.map(doc => doc.songId);
+  }
+  return memoryDB.playedSongs;
+}
+
+async function addPlayedSong(songId) {
+  const collection = await getCollection('playedSongs');
+  if (collection) {
+    // Vérifier si déjà dans la liste
+    const exists = await collection.findOne({ songId });
+    if (!exists) {
+      await collection.insertOne({ songId, playedAt: Date.now() });
+    }
+  } else {
+    if (!memoryDB.playedSongs.includes(songId)) {
+      memoryDB.playedSongs.push(songId);
+    }
+  }
+}
+
+async function clearPlayedSongs() {
+  const collection = await getCollection('playedSongs');
+  if (collection) {
+    await collection.deleteMany({});
+  } else {
+    memoryDB.playedSongs = [];
   }
 }
 
@@ -234,4 +275,7 @@ module.exports = {
   getActiveVoteSession,
   setActiveVoteSession,
   clearActiveVoteSession,
+  getPlayedSongs,
+  addPlayedSong,
+  clearPlayedSongs,
 };

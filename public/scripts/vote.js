@@ -5,6 +5,7 @@ let allUsers = [];
 let pollingInterval = null;
 let countdownInterval = null;
 let hasVoted = false;
+let currentSessionId = null; // Pour traquer les différentes sessions
 
 async function init() {
   const currentUserId = localStorage.getItem('userId');
@@ -61,13 +62,30 @@ async function checkActiveVote() {
     const res = await fetch('/api/active-vote');
     const data = await res.json();
     
-    if (data.active && !hasVoted) {
-      // Il y a un vote actif, afficher l'interface
-      displayVoteInterface(data);
+    if (data.active) {
+      // Créer un identifiant unique pour cette session
+      const sessionId = data.songId + '_' + data.startTime;
+      
+      // Si c'est une nouvelle session, réinitialiser hasVoted
+      if (currentSessionId !== sessionId) {
+        hasVoted = false;
+        currentSessionId = sessionId;
+      }
+      
+      if (!hasVoted) {
+        // Il y a un vote actif, afficher l'interface
+        displayVoteInterface(data);
+      }
     } else if (!data.active && hasVoted) {
       // Le vote est terminé, réinitialiser
       hasVoted = false;
+      currentSessionId = null;
       showWelcomeMessage(localStorage.getItem('firstName'));
+    } else if (!data.active && !hasVoted) {
+      // Pas de vote actif et pas voté, afficher le message d'attente
+      if (!document.getElementById('waitMsg')) {
+        showWelcomeMessage(localStorage.getItem('firstName'));
+      }
     }
   } catch (err) {
     console.error('Erreur polling:', err);
@@ -78,8 +96,10 @@ function displayVoteInterface(voteData) {
   const container = document.getElementById('voteContainer');
   const currentUserId = localStorage.getItem('userId');
   
-  // Vérifier si l'interface est déjà affichée
-  if (document.getElementById('activeVoteCard')) {
+  // Vérifier si l'interface est déjà affichée pour cette session
+  const existingCard = document.getElementById('activeVoteCard');
+  if (existingCard) {
+    // Juste mettre à jour le countdown
     updateCountdown(voteData.remaining);
     return;
   }
@@ -96,6 +116,7 @@ function displayVoteInterface(voteData) {
   const card = document.createElement('div');
   card.className = 'card';
   card.id = 'activeVoteCard';
+  card.dataset.sessionId = voteData.songId + '_' + voteData.startTime;
   
   const title = document.createElement('h2');
   title.textContent = `${voteData.song.title} — ${voteData.song.artist}`;
@@ -217,9 +238,10 @@ function startCountdown(remaining) {
         msg.style.color = '#dc2626';
       }
       
-      // Réinitialiser hasVoted pour permettre le vote suivant
+      // Réinitialiser hasVoted et currentSessionId après 2 secondes pour le prochain vote
       setTimeout(() => {
         hasVoted = false;
+        currentSessionId = null;
       }, 2000);
     }
   };

@@ -31,13 +31,24 @@ async function loadSongs() {
     item.style.alignItems = 'center';
     item.style.gap = '16px';
     
+    // Ajouter un style différent si déjà jouée
+    if (s.played) {
+      item.style.backgroundColor = '#f3f4f6';
+      item.style.opacity = '0.7';
+    }
+    
     const infoDiv = document.createElement('div');
     infoDiv.style.flex = '1';
     
     const title = document.createElement('div');
-    title.textContent = `${s.title} — ${s.artist} (par ${owner ? owner.firstName : '—'})`;
+    const playedBadge = s.played ? ' ✓ Jouée' : '';
+    title.textContent = `${s.title} — ${s.artist} (par ${owner ? owner.firstName : '—'})${playedBadge}`;
     title.style.fontWeight = 'bold';
     title.style.marginBottom = '8px';
+    
+    if (s.played) {
+      title.style.color = '#6b7280';
+    }
 
     const player = document.createElement('div');
     player.className = 'player';
@@ -64,8 +75,8 @@ async function loadSongs() {
 
     // Bouton pour lancer le vote
     const voteBtn = document.createElement('button');
-    voteBtn.textContent = '▶ Lancer le vote';
-    voteBtn.style.backgroundColor = '#2563eb';
+    voteBtn.textContent = s.played ? '▶ Rejouer' : '▶ Lancer le vote';
+    voteBtn.style.backgroundColor = s.played ? '#6b7280' : '#2563eb';
     voteBtn.style.whiteSpace = 'nowrap';
     voteBtn.addEventListener('click', () => startVote(s.id));
 

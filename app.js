@@ -95,7 +95,15 @@ function createApp() {
   app.get('/api/songs', async (req, res) => {
     try {
       const songs = await db.getSongs();
-      res.json(songs);
+      const playedSongs = await db.getPlayedSongs();
+      
+      // Ajouter l'information "played" à chaque chanson
+      const songsWithPlayedStatus = songs.map(song => ({
+        ...song,
+        played: playedSongs.includes(song.id)
+      }));
+      
+      res.json(songsWithPlayedStatus);
     } catch (err) {
       console.error('Erreur get songs:', err);
       res.status(500).json({ error: 'Erreur serveur' });
@@ -152,7 +160,8 @@ function createApp() {
         db.deleteAllUsers(),
         db.deleteAllSongs(),
         db.deleteAllVotes(),
-        db.clearActiveVoteSession()
+        db.clearActiveVoteSession(),
+        db.clearPlayedSongs()
       ]);
       res.json({ success: true });
     } catch (err) {
