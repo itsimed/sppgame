@@ -216,9 +216,6 @@ function createApp() {
   // IMPORTANT: placé après la route /admin.html pour éviter un contournement via le fichier statique
   app.use(express.static(path.join(__dirname, 'public')));
 
-  // Route racine redirige vers l'inscription (début du flow)
-  app.get('/', (req, res) => res.redirect('/register.html'));
-
   // Gestionnaire d'erreurs global
   app.use((err, req, res, next) => {
     console.error('Error:', err);
